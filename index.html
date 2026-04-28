@@ -17,6 +17,10 @@
         .nav-links a { color: #888; text-decoration: none; font-weight: bold; font-size: 0.85em; text-transform: uppercase; }
         .nav-links a:hover { color: var(--primary); }
 
+        <div class="search-container" style="padding: 0 5%; margin-top: 20px;">
+    <input type="text" id="search-bar" placeholder="🔍 Busca tu plataforma (Netflix, Disney...)" onkeyup="filterProducts()">
+</div>
+
         /* Banner con Imagen Real */
         .main-banner { 
             height: 350px; 
@@ -143,6 +147,21 @@
 
             window.open(`https://wa.me/573162581097?text=${text}`, '_blank');
         }
+
+        function filterProducts() {
+    const input = document.getElementById('search-bar').value.toLowerCase();
+    const cards = document.querySelectorAll('.card');
+
+    cards.forEach(card => {
+        const title = card.querySelector('h3').innerText.toLowerCase();
+        // Si el título incluye lo que escribimos, se muestra, si no, se oculta
+        if (title.includes(input)) {
+            card.style.display = "block";
+        } else {
+            card.style.display = "none";
+        }
+    });
+}
     </script>
 
 <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
