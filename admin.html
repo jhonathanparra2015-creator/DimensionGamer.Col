@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel de Administración - StreamShop</title>
+    <style>
+        body { font-family: sans-serif; background: #121212; color: white; padding: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #1a1a1a; }
+        th, td { border: 1px solid #333; padding: 12px; text-align: left; }
+        th { background: #e50914; }
+        .status-badge { background: #25d366; color: black; padding: 4px 8px; border-radius: 4px; font-size: 0.8em; }
+    </style>
+</head>
+<body>
+    <h1>Gestión de Pedidos Recientes</h1>
+    <div id="loading">Cargando pedidos...</div>
+    
+    <table id="orders-table" style="display:none;">
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Cliente</th>
+                <th>Productos</th>
+                <th>Total</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="orders-body"></tbody>
+    </table>
+
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
+
+    <script>
+        // 1. Usa la MISMA configuración que en tu index.html
+const firebaseConfig = {
+  apiKey: "AIzaSyAjAmZM8KUnX361LtAv_7nAKqqpTJafNXw",
+  authDomain: "dimensiongamercol-659d7.firebaseapp.com",
+  projectId: "dimensiongamercol-659d7",
+  storageBucket: "dimensiongamercol-659d7.firebasestorage.app",
+  messagingSenderId: "826111260875",
+  appId: "1:826111260875:web:8ee179e4fb4e41da3b834e",
+  measurementId: "G-FXMV9SBZ5D"
+};
+
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // 2. Seguridad Básica (Simple pero efectiva para empezar)
+        const pass = prompt("Introduce la clave de administrador:");
+        if (pass !== "Kiara050793") { // Cambia esto por tu clave real
+            alert("Acceso denegado");
+            window.location.href = "index.html";
+        } else {
+            loadOrders();
+        }
+
+        function loadOrders() {
+            const ordersRef = database.ref('pedidos');
+            ordersRef.on('value', (snapshot) => {
+                const data = snapshot.val();
+                const tbody = document.getElementById('orders-body');
+                tbody.innerHTML = ""; // Limpiar tabla
+
+                if (data) {
+                    document.getElementById('loading').style.display = "none";
+                    document.getElementById('orders-table').style.display = "table";
+
+                    // Convertir objeto de Firebase en una lista y recorrerla
+                    Object.keys(data).reverse().forEach(key => {
+                        const order = data[key];
+                        const row = `
+                            <tr>
+                                <td>${order.fecha}</td>
+                                <td>${order.cliente}<br><small>${order.email}</small></td>
+                                <td>${order.productos.map(p => p.platform + " (" + p.variant + ")").join(', ')}</td>
+                                <td>$${order.total.toFixed(2)}</td>
+                                <td>
+                                    <button onclick="deleteOrder('${key}')">Eliminar</button>
+                                </td>
+                            </tr>
+                        `;
+                        tbody.innerHTML += row;
+                    });
+                }
+            });
+        }
+
+        function deleteOrder(id) {
+            if(confirm("¿Seguro que deseas eliminar este pedido?")) {
+                database.ref('pedidos/' + id).remove();
+            }
+        }
+    </script>
+</body>
+</html>
